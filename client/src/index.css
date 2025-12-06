@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { background: #f8fafc; }
+.input { @apply border p-2 rounded w-full; }
+.btn { @apply px-4 py-2 rounded border; }
+.btn-primary { @apply px-4 py-2 rounded bg-sky-600 text-white; }
+.preview-paper { @apply bg-white p-6 text-black shadow print:shadow-none; width: 800px; margin: 0 auto; }
+
+/* Glass helper (soft-blue glass) */
+.glass {
+  background-clip: padding-box;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* optional: make text inside glass more legible on dark backgrounds */
+body .glass, .glass * {
+  color: #E6F0FF;
+}
