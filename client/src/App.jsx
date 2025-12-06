@@ -6,6 +6,9 @@ import axios from "axios";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 export default function App() {
+  // 🔥 API BASE URL (Works on Netlify + Local)
+  const API = import.meta.env.VITE_API_URL;
+
   const [resume, setResume] = useState({
     name: "",
     contact: { email: "", phone: "", location: "", linkedin: "" },
@@ -18,38 +21,29 @@ export default function App() {
   const [suggestions, setSuggestions] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
 
-  // ✔ TEMPLATE STATE
   const [template, setTemplate] = useState("modern");
 
-  // ================================
-  //  DRAG DROP SORTING
-  // ================================
+  // ============================================================
+  // DRAG–DROP SORTING
+  // ============================================================
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
     const { source, destination, type } = result;
 
-    let arrayMap = {
-      skills: [...resume.skills],
-      experience: [...resume.experience],
-      education: [...resume.education],
-    };
+    const updated = [...resume[type]];
+    const [moved] = updated.splice(source.index, 1);
+    updated.splice(destination.index, 0, moved);
 
-    if (arrayMap[type]) {
-      const items = arrayMap[type];
-      const [moved] = items.splice(source.index, 1);
-      items.splice(destination.index, 0, moved);
-
-      setResume((prev) => ({ ...prev, [type]: items }));
-    }
+    setResume((prev) => ({ ...prev, [type]: updated }));
   };
 
-  // ================================
-  // SAVE RESUME
-  // ================================
+  // ============================================================
+  // SAVE RESUME (uses backend API)
+  // ============================================================
   const saveToServer = async () => {
     try {
-      await axios.post("http://localhost:4000/api/resumes", resume);
+      await axios.post(`${API}/api/resumes`, resume);
       alert("Saved!");
     } catch (error) {
       console.error(error);
@@ -57,12 +51,12 @@ export default function App() {
     }
   };
 
-  // ================================
+  // ============================================================
   // AI SUGGESTIONS
-  // ================================
+  // ============================================================
   const getSuggestions = async () => {
     try {
-      const response = await axios.post("http://localhost:4000/api/suggest", { resume });
+      const response = await axios.post(`${API}/api/suggest`, { resume });
       setSuggestions(response.data.result);
     } catch (error) {
       console.error(error);
@@ -70,16 +64,15 @@ export default function App() {
     }
   };
 
-  // ================================
+  // ============================================================
   // ATS MATCH
-  // ================================
+  // ============================================================
   const matchResume = async (jobDescription) => {
     try {
-      const response = await axios.post("http://localhost:4000/api/match", {
+      const response = await axios.post(`${API}/api/match`, {
         resume,
-        jobDescription,
+        jobDescription
       });
-
       setMatchResult(response.data.result);
     } catch (err) {
       console.error("ATS Match Error:", err);
@@ -87,16 +80,15 @@ export default function App() {
     }
   };
 
-  // ================================
-  // DARK UI LAYOUT
-  // ================================
+  // ============================================================
+  // UI LAYOUT
+  // ============================================================
   return (
-    <div className="min-h-screen p-6 
-        bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#0f172a] 
-        text-white transition-all duration-700"
+    <div
+      className="min-h-screen p-6 
+      bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#0f172a] 
+      text-white transition-all duration-700"
     >
-
-      {/* 🔥 FIXED: Heading was INVISIBLE — now bright */}
       <h1 className="text-3xl font-bold mb-6 text-blue-100 text-center tracking-tight drop-shadow">
         Smart Resume Builder ✨
       </h1>
@@ -104,16 +96,10 @@ export default function App() {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-12 gap-6">
 
-          {/* LEFT PANEL — Resume Editor */}
-          <div
-            className="col-span-3 backdrop-blur-xl 
-                       bg-white/5 border border-white/10 
-                       text-white shadow-2xl rounded-2xl p-5 
-                       h-[85vh] overflow-y-auto"
-          >
-            <h2 className="text-xl font-semibold mb-4 text-blue-300">
-              Resume Editor
-            </h2>
+          {/* LEFT PANEL */}
+          <div className="col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
+                          text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4 text-blue-300">Resume Editor</h2>
 
             <ResumeForm
               resume={resume}
@@ -123,32 +109,24 @@ export default function App() {
             />
           </div>
 
-          {/* MIDDLE PREVIEW */}
-          <div
-            className="col-span-6 rounded-2xl p-5 
-                       backdrop-blur-xl bg-white/5 
-                       border border-white/10 shadow-2xl 
-                       h-[85vh] overflow-y-auto"
-          >
+          {/* PREVIEW PANEL */}
+          <div className="col-span-6 rounded-2xl p-5 backdrop-blur-xl bg-white/5 
+                          border border-white/10 shadow-2xl h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-blue-300">
-                Preview
-              </h2>
+              <h2 className="text-xl font-semibold text-blue-300">Preview</h2>
 
-              {/* 🔥 FIXED TEMPLATE DROPDOWN — now visible */}
+              {/* Template selection */}
               <select
                 value={template}
                 onChange={(e) => setTemplate(e.target.value)}
-                className="
-                  px-3 py-2 text-sm rounded-lg
-                  bg-[#1e293b] text-white border border-white/20 shadow
-                  focus:ring-2 focus:ring-blue-400 transition
-                "
+                className="px-3 py-2 text-sm rounded-lg
+                           bg-[#1e293b] text-white border border-white/20 shadow
+                           focus:ring-2 focus:ring-blue-400 transition"
               >
-                <option value="modern" className="bg-[#0f172a] text-white">Modern</option>
-                <option value="minimal" className="bg-[#0f172a] text-white">Minimal ATS</option>
-                <option value="corporate" className="bg-[#0f172a] text-white">Corporate</option>
-                <option value="creative" className="bg-[#0f172a] text-white">Creative</option>
+                <option value="modern">Modern</option>
+                <option value="minimal">Minimal ATS</option>
+                <option value="corporate">Corporate</option>
+                <option value="creative">Creative</option>
               </select>
             </div>
 
@@ -156,12 +134,8 @@ export default function App() {
           </div>
 
           {/* RIGHT PANEL — AI + ATS */}
-          <div
-            className="col-span-3 backdrop-blur-xl bg-white/5 
-                       border border-white/10 text-white 
-                       shadow-2xl rounded-2xl p-5 
-                       h-[85vh] overflow-y-auto"
-          >
+          <div className="col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
+                          text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
             <SuggestionsPanel
               suggestions={suggestions}
               matchResult={matchResult}
@@ -171,7 +145,7 @@ export default function App() {
                   setResume((r) => ({ ...r, summary: patch.summary }));
                 }
                 if (patch.improvedBullets) {
-                  alert("Bullet patch applied. (Mapping not implemented)");
+                  alert("Bullet patch applied (mapping needed).");
                 }
               }}
             />
