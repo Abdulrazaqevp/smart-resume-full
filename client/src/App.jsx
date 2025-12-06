@@ -39,46 +39,47 @@ export default function App() {
   };
 
   // ============================================================
-  // SAVE RESUME (uses backend API)
-  // ============================================================
-  const saveToServer = async () => {
-    try {
-      await axios.post(`${API}/api/resumes`, resume);
-      alert("Saved!");
-    } catch (error) {
-      console.error(error);
-      alert("Save failed");
-    }
-  };
+// SAVE RESUME
+// ============================================================
+const saveToServer = async () => {
+  try {
+    await axios.post(`${API}/api/resumes`, resume);
+    alert("Saved!");
+  } catch (error) {
+    console.error(error);
+    alert("Save failed");
+  }
+};
 
-  // ============================================================
-  // AI SUGGESTIONS
-  // ============================================================
-  const getSuggestions = async () => {
-    try {
-      const response = await axios.post(`${API}/api/suggest`, { resume });
-      setSuggestions(response.data.result);
-    } catch (error) {
-      console.error(error);
-      alert("AI Suggestion failed");
-    }
-  };
+// ============================================================
+// AI SUGGESTIONS
+// ============================================================
+const getSuggestions = async () => {
+  try {
+    const response = await axios.post(`${API}/api/suggest`, { resume });
+    setSuggestions(response.data.result);
+  } catch (error) {
+    console.error(error);
+    alert("AI Suggestion failed");
+  }
+};
 
-  // ============================================================
-  // ATS MATCH
-  // ============================================================
-  const matchResume = async (jobDescription) => {
-    try {
-      const response = await axios.post(`${API}/api/match`, {
-        resume,
-        jobDescription
-      });
-      setMatchResult(response.data.result);
-    } catch (err) {
-      console.error("ATS Match Error:", err);
-      alert("ATS Match failed");
-    }
-  };
+// ============================================================
+// ATS MATCH
+// ============================================================
+const matchResume = async (jobDescription) => {
+  try {
+    const response = await axios.post(`${API}/api/match`, {
+      resume,
+      jobDescription
+    });
+    setMatchResult(response.data.result);
+  } catch (err) {
+    console.error("ATS Match Error:", err);
+    alert("ATS Match failed");
+  }
+};
+
 
   // ============================================================
   // UI LAYOUT
