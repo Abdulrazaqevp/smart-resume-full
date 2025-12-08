@@ -111,13 +111,13 @@ export default function App() {
 
       {/* SOCIAL ICONS */}
       <div className="flex justify-center gap-6 mt-4 text-blue-100 text-2xl">
-        <a href="https://linkedin.com" target="_blank" className="hover:text-blue-400 transition">
+        <a href="https://www.linkedin.com/in/abdul-razaqe-vp/" target="_blank" className="hover:text-blue-400 transition">
           <FaLinkedin />
         </a>
-        <a href="https://github.com" target="_blank" className="hover:text-blue-400 transition">
+        <a href="https://github.com/Abdulrazaqevp" target="_blank" className="hover:text-blue-400 transition">
           <FaGithub />
         </a>
-        <a href="https://instagram.com" target="_blank" className="hover:text-pink-400 transition">
+        <a href="https://www.instagram.com/itsme_razaqe/" target="_blank" className="hover:text-pink-400 transition">
           <FaInstagram />
         </a>
         <a
