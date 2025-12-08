@@ -8,33 +8,75 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    // Load API key safely inside request
+    const apiKey = process.env.GROQ_API_KEY;
 
-    if (!process.env.GROQ_API_KEY) {
-      console.log("🚨 Missing GROQ_API_KEY");
-      return res.status(500).json({ error: "Server missing API key" });
+    if (!apiKey) {
+      console.error("❌ Missing GROQ_API_KEY in environment!");
+      return res.status(500).json({
+        error: "Server missing GROQ API key",
+        result: null
+      });
     }
+
+    const client = new Groq({ apiKey });
 
     const { resume } = req.body;
 
     const prompt = `
-      Improve this resume summary, give tips, and rewrite bullet points:
+Return ONLY this JSON structure:
 
-      Resume:
-      ${JSON.stringify(resume, null, 2)}
+{
+  "summary": "",
+  "tips": [],
+  "improvedBullets": []
+}
+
+Improve the resume content below:
+
+${JSON.stringify(resume, null, 2)}
     `;
 
-    const result = await groq.chat.completions.create({
+    const ai = await client.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
+      temperature: 0.2,
+      messages: [{ role: "user", content: prompt }]
     });
 
-    return res.json({ result: JSON.parse(result.choices[0].message.content) });
+    let text = ai.choices[0].message.content.trim();
+
+    // -------------------------------
+    // 1) Extract JSON if wrapped
+    // -------------------------------
+    let jsonString = text;
+
+    const jsonMatch = text.match(/```json([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonString = jsonMatch[1].trim();
+    }
+
+    // -------------------------------
+    // 2) Try parsing JSON
+    // -------------------------------
+    let result;
+    try {
+      result = JSON.parse(jsonString);
+    } catch (e) {
+      console.error("❌ JSON parse error:", e);
+      return res.status(500).json({
+        error: "AI returned invalid JSON",
+        raw: text
+      });
+    }
+
+    return res.json({ result });
 
   } catch (err) {
-    console.error("🔥 GROQ ERROR:", err);
-    return res.status(500).json({ error: "AI Suggestion failed" });
+    console.error("🔥 Suggest Error:", err);
+    return res.status(500).json({
+      error: "AI Suggestion failed",
+      details: err.message
+    });
   }
 });
 

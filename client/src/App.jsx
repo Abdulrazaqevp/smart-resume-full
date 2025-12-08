@@ -39,47 +39,46 @@ export default function App() {
   };
 
   // ============================================================
-// SAVE RESUME
-// ============================================================
-const saveToServer = async () => {
-  try {
-    await axios.post(`${API}/api/resumes`, resume);
-    alert("Saved!");
-  } catch (error) {
-    console.error(error);
-    alert("Save failed");
-  }
-};
+  // SAVE RESUME (uses backend API)
+  // ============================================================
+  const saveToServer = async () => {
+    try {
+      await axios.post(`${API}/api/resumes`, resume);
+      alert("Saved!");
+    } catch (error) {
+      console.error(error);
+      alert("Save failed");
+    }
+  };
 
-// ============================================================
-// AI SUGGESTIONS
-// ============================================================
-const getSuggestions = async () => {
-  try {
-    const response = await axios.post(`${API}/api/suggest`, { resume });
-    setSuggestions(response.data.result);
-  } catch (error) {
-    console.error(error);
-    alert("AI Suggestion failed");
-  }
-};
+  // ============================================================
+  // AI SUGGESTIONS
+  // ============================================================
+  const getSuggestions = async () => {
+    try {
+      const response = await axios.post(`${API}/api/suggest`, { resume });
+      setSuggestions(response.data.result);
+    } catch (error) {
+      console.error(error);
+      alert("AI Suggestion failed");
+    }
+  };
 
-// ============================================================
-// ATS MATCH
-// ============================================================
-const matchResume = async (jobDescription) => {
-  try {
-    const response = await axios.post(`${API}/api/match`, {
-      resume,
-      jobDescription
-    });
-    setMatchResult(response.data.result);
-  } catch (err) {
-    console.error("ATS Match Error:", err);
-    alert("ATS Match failed");
-  }
-};
-
+  // ============================================================
+  // ATS MATCH
+  // ============================================================
+  const matchResume = async (jobDescription) => {
+    try {
+      const response = await axios.post(`${API}/api/match`, {
+        resume,
+        jobDescription
+      });
+      setMatchResult(response.data.result);
+    } catch (err) {
+      console.error("ATS Match Error:", err);
+      alert("ATS Match failed");
+    }
+  };
 
   // ============================================================
   // UI LAYOUT
@@ -98,7 +97,7 @@ const matchResume = async (jobDescription) => {
         <div className="grid grid-cols-12 gap-6">
 
           {/* LEFT PANEL */}
-          <div className="col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
+          <div className="col-span-12 md:col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
                           text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-blue-300">Resume Editor</h2>
 
@@ -111,12 +110,11 @@ const matchResume = async (jobDescription) => {
           </div>
 
           {/* PREVIEW PANEL */}
-          <div className="col-span-6 rounded-2xl p-5 backdrop-blur-xl bg-white/5 
+          <div className="col-span-12 md:col-span-6 rounded-2xl p-5 backdrop-blur-xl bg-white/5 
                           border border-white/10 shadow-2xl h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-blue-300">Preview</h2>
 
-              {/* Template selection */}
               <select
                 value={template}
                 onChange={(e) => setTemplate(e.target.value)}
@@ -135,7 +133,7 @@ const matchResume = async (jobDescription) => {
           </div>
 
           {/* RIGHT PANEL — AI + ATS */}
-          <div className="col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
+          <div className="col-span-12 md:col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
                           text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
             <SuggestionsPanel
               suggestions={suggestions}
