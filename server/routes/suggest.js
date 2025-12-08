@@ -6,77 +6,47 @@ dotenv.config();
 
 const router = express.Router();
 
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || "HARDCODE_TEMP_KEY"
+});
+
 router.post("/", async (req, res) => {
   try {
-    // Load API key safely inside request
-    const apiKey = process.env.GROQ_API_KEY;
-
-    if (!apiKey) {
-      console.error("❌ Missing GROQ_API_KEY in environment!");
-      return res.status(500).json({
-        error: "Server missing GROQ API key",
-        result: null
-      });
-    }
-
-    const client = new Groq({ apiKey });
-
     const { resume } = req.body;
 
     const prompt = `
-Return ONLY this JSON structure:
+Return ONLY valid JSON.
+Without any text, markdown, or explanation.
 
+JSON Format:
 {
   "summary": "",
   "tips": [],
   "improvedBullets": []
 }
 
-Improve the resume content below:
-
+Resume Data:
 ${JSON.stringify(resume, null, 2)}
-    `;
+`;
 
-    const ai = await client.chat.completions.create({
+    const ai = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
-      messages: [{ role: "user", content: prompt }]
     });
 
-    let text = ai.choices[0].message.content.trim();
+    let content = ai.choices[0].message.content.trim();
 
-    // -------------------------------
-    // 1) Extract JSON if wrapped
-    // -------------------------------
-    let jsonString = text;
+    // Remove markdown wrapping if present
+    content = content.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    const jsonMatch = text.match(/```json([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonString = jsonMatch[1].trim();
-    }
+    const result = JSON.parse(content);
 
-    // -------------------------------
-    // 2) Try parsing JSON
-    // -------------------------------
-    let result;
-    try {
-      result = JSON.parse(jsonString);
-    } catch (e) {
-      console.error("❌ JSON parse error:", e);
-      return res.status(500).json({
-        error: "AI returned invalid JSON",
-        raw: text
-      });
-    }
-
-    return res.json({ result });
+    res.json({ result });
 
   } catch (err) {
     console.error("🔥 Suggest Error:", err);
-    return res.status(500).json({
-      error: "AI Suggestion failed",
-      details: err.message
-    });
+    res.status(500).json({ error: "Suggest failed", details: err.message });
   }
 });
 

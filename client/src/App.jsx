@@ -6,8 +6,8 @@ import axios from "axios";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 export default function App() {
-  // 🔥 API BASE URL (Works on Netlify + Local)
-  const API = import.meta.env.VITE_API_URL;
+ // Works on both local and deployed
+const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
   const [resume, setResume] = useState({
     name: "",
@@ -90,7 +90,7 @@ export default function App() {
       text-white transition-all duration-700"
     >
       <h1 className="text-3xl font-bold mb-6 text-blue-100 text-center tracking-tight drop-shadow">
-        Smart Resume Builder ✨
+        Smart Resume Builder 
       </h1>
 
       <DragDropContext onDragEnd={handleDragEnd}>
