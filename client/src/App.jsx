@@ -4,10 +4,12 @@ import Preview from "./components/Preview";
 import SuggestionsPanel from "./components/SuggestionsPanel";
 import axios from "axios";
 import { DragDropContext } from "@hello-pangea/dnd";
+import { FaGithub, FaLinkedin, FaInstagram, FaBug } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 export default function App() {
- // Works on both local and deployed
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  // Works on both local and deployed
+  const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
   const [resume, setResume] = useState({
     name: "",
@@ -39,7 +41,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
   };
 
   // ============================================================
-  // SAVE RESUME (uses backend API)
+  // SAVE RESUME
   // ============================================================
   const saveToServer = async () => {
     try {
@@ -81,6 +83,56 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
   };
 
   // ============================================================
+  // FOOTER COMPONENT
+  // ============================================================
+  const Footer = () => (
+    <motion.footer
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="
+        mt-14 py-8 text-center rounded-xl
+        bg-white/5 backdrop-blur-xl 
+        border border-white/10 shadow-inner
+      "
+    >
+      <h3 className="text-blue-100 font-semibold text-lg tracking-wide">
+        Smart Resume Builder — Beta Release
+      </h3>
+
+      <p className="text-blue-200/80 text-sm mt-1">
+        © {new Date().getFullYear()} Abdul Razaqe vallippadan.All rights reserved.
+      </p>
+
+      <p className="text-blue-300/70 text-xs mt-2 max-w-lg mx-auto leading-relaxed">
+        The platform is under active development.  
+        AI features, ATS scoring, and export tools may behave inconsistently.
+      </p>
+
+      {/* SOCIAL ICONS */}
+      <div className="flex justify-center gap-6 mt-4 text-blue-100 text-2xl">
+        <a href="https://linkedin.com" target="_blank" className="hover:text-blue-400 transition">
+          <FaLinkedin />
+        </a>
+        <a href="https://github.com" target="_blank" className="hover:text-blue-400 transition">
+          <FaGithub />
+        </a>
+        <a href="https://instagram.com" target="_blank" className="hover:text-pink-400 transition">
+          <FaInstagram />
+        </a>
+        <a
+          href="https://github.com/Abdulrazaqevp/smart-resume-full/issues"
+          target="_blank"
+          className="hover:text-red-400 transition"
+          title="Report an Issue"
+        >
+          <FaBug />
+        </a>
+      </div>
+    </motion.footer>
+  );
+
+  // ============================================================
   // UI LAYOUT
   // ============================================================
   return (
@@ -90,13 +142,13 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
       text-white transition-all duration-700"
     >
       <h1 className="text-3xl font-bold mb-6 text-blue-100 text-center tracking-tight drop-shadow">
-        Smart Resume Builder 
+        Smart Resume Builder
       </h1>
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-12 gap-6">
 
-          {/* LEFT PANEL */}
+          {/* ============ LEFT PANEL ============ */}
           <div className="col-span-12 md:col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
                           text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-blue-300">Resume Editor</h2>
@@ -109,7 +161,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
             />
           </div>
 
-          {/* PREVIEW PANEL */}
+          {/* ============ PREVIEW PANEL ============ */}
           <div className="col-span-12 md:col-span-6 rounded-2xl p-5 backdrop-blur-xl bg-white/5 
                           border border-white/10 shadow-2xl h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
@@ -132,7 +184,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
             <Preview resume={resume} template={template} />
           </div>
 
-          {/* RIGHT PANEL — AI + ATS */}
+          {/* ============ RIGHT PANEL (AI + ATS) ============ */}
           <div className="col-span-12 md:col-span-3 backdrop-blur-xl bg-white/5 border border-white/10 
                           text-white shadow-2xl rounded-2xl p-5 h-[85vh] overflow-y-auto">
             <SuggestionsPanel
@@ -152,6 +204,9 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
         </div>
       </DragDropContext>
+
+      {/* FOOTER */}
+      <Footer />
     </div>
   );
 }
