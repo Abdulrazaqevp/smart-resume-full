@@ -3,7 +3,7 @@ import Resume from "../models/Resume.js";
 
 const router = express.Router();
 
-// Create
+// CREATE
 router.post("/", async (req, res) => {
   try {
     const doc = new Resume(req.body);
@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get All
+// READ ALL
 router.get("/", async (req, res) => {
   try {
     const list = await Resume.find().sort({ createdAt: -1 }).limit(50);
