@@ -1,24 +1,20 @@
-
 import express from "express";
 import Groq from "groq-sdk";
 
 const router = express.Router();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-
 router.post("/", async (req, res) => {
   try {
     const { resume, jobDescription } = req.body;
 
     const prompt = `
-Compare this resume with the job description.
-Return ONLY this JSON:
+Extract skills comparison ONLY.
 
+Return STRICT JSON:
 {
-  "score": 0,
   "matchedSkills": [],
   "missingSkills": [],
-  "summary": "",
   "recommendations": []
 }
 
@@ -32,17 +28,42 @@ ${jobDescription}
     const aiRes = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.1,
+      temperature: 0,
     });
 
-    let text = aiRes.choices[0].message.content.trim();
-
+    const text = aiRes.choices[0].message.content;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("JSON not detected");
 
-    const result = JSON.parse(jsonMatch[0]);
+    const parsed = JSON.parse(jsonMatch[0]);
 
-    res.json({ result });
+    const matched = parsed.matchedSkills?.length || 0;
+    const missing = parsed.missingSkills?.length || 0;
+    const total = matched + missing || 1;
+
+    // ✅ REALISTIC ATS SCORING
+    let score = Math.round((matched / total) * 100);
+
+    // Minimum credibility floor
+    if (score < 35) score = 35;
+
+    // Cap to avoid fake 100%
+    if (score > 95) score = 95;
+
+    res.json({
+      result: {
+        score,
+        matchedSkills: parsed.matchedSkills,
+        missingSkills: parsed.missingSkills,
+        summary:
+          score >= 75
+            ? "Strong alignment with job requirements."
+            : score >= 50
+            ? "Partial alignment with job requirements."
+            : "Limited alignment with job requirements.",
+        recommendations: parsed.recommendations || [],
+      },
+    });
 
   } catch (err) {
     console.error("🔥 ATS Error:", err);
@@ -51,4 +72,3 @@ ${jobDescription}
 });
 
 export default router;
-console.log("DEBUG MATCH ROUTE KEY:", process.env.GROQ_API_KEY);
